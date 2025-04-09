@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather Predictor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-white min-h-screen font-sans text-gray-800">
+
+  <div class="max-w-4xl mx-auto p-6">
+    <h1 class="text-4xl font-bold text-center mb-6">🌤️ Weather Predictor</h1>
+
+    <!-- Prediction Highlight -->
+    <div class="bg-white shadow-xl rounded-2xl p-6 text-center border-2 border-blue-400">
+      <h2 class="text-xl font-medium text-gray-700 mb-2">Predicted Weather Condition:</h2>
+      <p class="text-3xl font-bold text-blue-600">{{ prediction | title }}</p>
+    </div>
+
+    <!-- Location Details -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-6 text-sm text-gray-600">
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">City</h3>
+        <p>{{ data.location.name }}</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Region</h3>
+        <p>{{ data.location.region }}</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Country</h3>
+        <p>{{ data.location.country }}</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Local Time</h3>
+        <p>{{ data.location.localtime }}</p>
+      </div>
+    </div>
+
+    <!-- Current Weather Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {% set c = data.current %}
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Condition</h3>
+        <img src="{{ c.condition.icon }}" alt="icon" class="mx-auto mb-1">
+        <p>{{ c.condition.text }}</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Temperature</h3>
+        <p>{{ c.temp_c }}°C / {{ c.temp_f }}°F</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Feels Like</h3>
+        <p>{{ c.feelslike_c }}°C</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Humidity</h3>
+        <p>{{ c.humidity }}%</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Precipitation</h3>
+        <p>{{ c.precip_mm }} mm</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Wind</h3>
+        <p>{{ c.wind_kph }} kph ({{ c.wind_dir }})</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">UV Index</h3>
+        <p>{{ c.uv }}</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <h3 class="font-semibold">Visibility</h3>
+        <p>{{ c.vis_km }} km</p>
+      </div>
+    </div>
+
+    <div class="bg-white mt-10 p-6 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4">🔍 Test Your Own Weather Data</h2>
+        <p class="text-sm text-gray-500 mb-2">Enter values to simulate and predict weather:</p>
+      
+        <!-- Field instructions -->
+        <ul class="text-xs text-gray-600 mb-4 list-disc pl-5">
+          <li>Precipitation (mm): 0 - 20</li>
+          <li>Average Temperature (°C): -10 - 40</li>
+          <li>Wind (kph): 0 - 60</li>
+          <li>Date: Format YYYY-MM-DD</li>
+        </ul>
+      
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <input id="precip" type="number" placeholder="Precipitation" class="border p-2 rounded w-full" />
+          <input id="temp" type="number" placeholder="Average Temperature" class="border p-2 rounded w-full" />
+          <input id="wind" type="number" placeholder="Wind Speed" class="border p-2 rounded w-full" />
+          <input id="date" type="date" class="border p-2 rounded w-full" />
+        </div>
+      
+        <button onclick="submitPrediction()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Predict
+        </button>
+      
+        <p id="result" class="mt-4 text-lg font-semibold text-gray-800"></p>
+      </div>
+      <p class="mt-10 text-center text-xs text-gray-500">Last updated: {{ data.current.last_updated }}</p>
+      
+      <script>
+        async function submitPrediction() {
+          const precip = document.getElementById("precip").value;
+          const temp = document.getElementById("temp").value;
+          const wind = document.getElementById("wind").value;
+          const date = document.getElementById("date").value;
+      
+          const payload = {
+            precipitation: precip,
+            temp_avg: temp,
+            wind: wind,
+            date: date
+          };
+      
+          const res = await fetch('/predict', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+      
+          const json = await res.json();
+          document.getElementById("result").textContent = json.prediction || json.error;
+        }
+      </script>
+      
+  </div>
+
+</body>
+</html>
